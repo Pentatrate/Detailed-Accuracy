@@ -237,15 +237,17 @@ function DetailedAccDraw()
                 return k1.time < k2.time
             end)
 
-            if not LvlDataDA.SectionBests[DetailedAccBuckets[tonumber(LastSDA) - 1].name] then
+            secName = cs.rateMod .. "x-" .. DetailedAccBuckets[tonumber(LastSDA) - 1].name
+
+            if not LvlDataDA[cs.variant.name].SectionBests[secName] then
                 playBlip = false
             end
 
-            local t = LvlDataDA.SectionBests[DetailedAccBuckets[tonumber(LastSDA) - 1].name] or {misses = 99999999999, barelies = 99999999999}
+            local t = LvlDataDA[cs.variant.name].SectionBests[secName] or {misses = 99999999999, barelies = 99999999999}
 
             local isMissPB = t.misses > DetailedAccBuckets[tonumber(LastSDA) - 1].misses
 
-            LvlDataDA.SectionBests[DetailedAccBuckets[tonumber(LastSDA) - 1].name] = {
+            LvlDataDA[cs.variant.name].SectionBests[secName] = {
 
                 misses = t.misses > DetailedAccBuckets[tonumber(LastSDA) - 1].misses and DetailedAccBuckets[tonumber(LastSDA) - 1].misses or t.misses,
                 barelies = t.barelies > DetailedAccBuckets[tonumber(LastSDA) - 1].barelies and DetailedAccBuckets[tonumber(LastSDA) - 1].barelies or t.barelies,
@@ -260,13 +262,13 @@ function DetailedAccDraw()
                 playBlip = false
             end
 
-            local def = SessionBest[cLevel] and SessionBest[cLevel][DetailedAccBuckets[tonumber(LastSDA) - 1].name] or {misses = 99999999999, barelies = 99999999999}
+            local def = SessionBest[cLevel] and SessionBest[cLevel][secName] or {misses = 99999999999, barelies = 99999999999}
 
             SessionBest[cLevel] = SessionBest[cLevel] or {}
 
             local isSessionMissPB = def.misses > DetailedAccBuckets[tonumber(LastSDA) - 1].misses
 
-            SessionBest[cLevel][DetailedAccBuckets[tonumber(LastSDA) - 1].name] = {
+            SessionBest[cLevel][secName] = {
 
                 misses = def.misses > DetailedAccBuckets[tonumber(LastSDA) - 1].misses and DetailedAccBuckets[tonumber(LastSDA) - 1].misses or def.misses,
                 barelies = def.barelies > DetailedAccBuckets[tonumber(LastSDA) - 1].barelies and DetailedAccBuckets[tonumber(LastSDA) - 1].barelies or def.barelies,
@@ -277,9 +279,9 @@ function DetailedAccDraw()
             local PassedMaxMisses = false
             GORESETLEVELDA = false
 
-            if LvlDataDA.MaxMissPSection[DetailedAccBuckets[tonumber(LastSDA) - 1].name] then
+            if LvlDataDA[cs.variant.name].MaxMissPSection[DetailedAccBuckets[tonumber(LastSDA) - 1].name] then
 
-                PassedMaxMisses = DetailedAccBuckets[tonumber(LastSDA) - 1].misses > LvlDataDA.MaxMissPSection[DetailedAccBuckets[tonumber(LastSDA) - 1].name]
+                PassedMaxMisses = DetailedAccBuckets[tonumber(LastSDA) - 1].misses > LvlDataDA[cs.variant.name].MaxMissPSection[DetailedAccBuckets[tonumber(LastSDA) - 1].name]
 
             end
 
@@ -287,14 +289,15 @@ function DetailedAccDraw()
 
                 te.playOne(sounds.MthreshFail, "static", "sfx",mods["DetailedAcc"].config.BlipVolume)
 
-                GORESETLEVELDA = true
-
-                if cs.restartOn == "Miss thresholds" then
+                if cs.restartOn == "Miss thresholds" and not (cs.name == "Editor" and cs.editMode == false)then
                     GORESETLEVELDA = true
                 end
             else
 
-                dpf.saveJson("Mods/DetailedAcc/LvlData/" .. string.sub(cLevel,1,string.len(cLevel) - 1) .. ".json", LvlDataDA)
+
+                if not (cs.name == "Editor" and cs.editMode == false) then
+                    dpf.saveJson("Mods/DetailedAcc/LvlData/" .. string.sub(cLevel,1,string.len(cLevel) - 1) .. ".json", LvlDataDA)
+                end
 
                 if mods["DetailedAcc"].config.SectionBlips and DetailedAccBuckets[tonumber(LastSDA) - 1] then
                     local bucket = DetailedAccBuckets[tonumber(LastSDA) - 1]
@@ -369,4 +372,23 @@ function DetailedAccDraw()
         love.graphics.setColor(0,0,0)
         love.graphics.printf("Beat: " .. tostring(math.floor(cs.cBeat * 100) / 100), Tx, 2 + mods["DetailedAcc"].config.TimerYOffset, 200, "left")
     end
+
+    if mods["DetailedAcc"].config.vsEnding and DAvsEnding then
+
+        if cs.misses == 0 then
+
+            if cs.barelies == 0 then
+                result = "All Perfect!"
+            else
+                result = "Full Combo!"
+            end
+
+            love.graphics.setFont(fonts.blowafuse)
+            love.graphics.setColor(0,0,0)
+            love.graphics.printf(result, 250, 180, 100, "center")
+        
+        end
+
+    end
+
 end

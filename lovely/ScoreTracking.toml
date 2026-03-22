@@ -90,25 +90,47 @@ print(path)
 
 LvlDataDA = {}
 
+print(cs.variant)
+
+
+
+
 if love.filesystem.getInfo(path) then
     LvlDataDA = dpf.loadJson(path)
+
+    if not LvlDataDA[cs.variant.name] then
+
+        --Need to create varient data
+        LvlDataDA[cs.variant.name] = {
+            Override = false,
+            Sections = {},
+            SectionBests = {},
+            MaxMissPSection = {}
+        }
+
+        dpf.saveJson(path, LvlDataDA)
+    end
+
 else
 
     --Need to create data
     LvlDataDA = {
+        [cs.variant.name] =
+        {
         Override = false,
         Sections = {},
         SectionBests = {},
         MaxMissPSection = {}
+        }
     }
 
     dpf.saveJson(path, LvlDataDA)
 
 end
 
-if LvlDataDA.Sections then
-    for i, v in pairs(LvlDataDA.Sections) do
-        table.insert(DetailedAccBookmarks,
+if LvlDataDA[cs.variant.name].Sections then
+    for i, v in pairs(LvlDataDA[cs.variant.name].Sections) do
+        table.insert(DetailedAccBookmarks,  
             {
                 time = v,
                 name = i
@@ -117,12 +139,18 @@ if LvlDataDA.Sections then
     end
 end
 
+for i, v in pairs(LvlDataDA) do
 
-if not LvlDataDA.Override then
+    print(i .. ": " .. tostring(v))
+
+end
+
+
+if not LvlDataDA[cs.variant.name].Override then
 
     for i, v in ipairs(cs.level.events) do
         if v.type == "bookmark" then
-            table.insert(DetailedAccBookmarks,
+            table.insert(DetailedAccBookmarks,  
                 {
                     time = v.time,
                     name = v.name
@@ -177,6 +205,7 @@ payload = '''
     TapOffsets = {}
     DetailedAccBuckets = nil
     Section2 = nil
+    DAvsEnding = false
 '''
 match_indent = true
 
@@ -452,6 +481,7 @@ target = "obj/GameManager.lua"
 position = "prepend"
 sources = ["MidGame.lua"]
 
+
 [[patches]]
 [patches.pattern]
 target = "states/Results.lua"
@@ -464,11 +494,21 @@ match_indent = true
 
 [[patches]]
 [patches.pattern]
+target = "obj/Player.lua"
+pattern = '''function Player:growTransition(endFunction,zoomValue)'''
+position = "after"
+payload = '''
+    DAvsEnding = true
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
 target = "states/Results.lua"
 pattern = '''st:setInit(function(self)'''
 position = "after"
 payload = '''
-
+    
     DetailedAccAccs = {{100, 0}}
 
     setupDetailedAccResults = false
@@ -526,7 +566,7 @@ target = "states/Game.lua"
 pattern = '''if cs.misses and cs.barelies then'''
 position = "before"
 payload = '''if GORESETLEVELDA then
-    GORESETLEVELDA = false
+    GORESETLEVELDA = false  
     if self.marathonData then
         self:leave()
         GameManager:resetMarathon()

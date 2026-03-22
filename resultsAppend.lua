@@ -295,11 +295,7 @@ st:setFgDraw(function(self)
         -- Play sound
 
         local Rank = 'what'
-		if self.lGrade == 'perfect' then
-            Rank = 'perfect'
-		else
-			Rank = self.lGrade
-		end
+		Rank = self.lGrade
 
         print("Playing rank: " .. tostring(Rank) .. "Song")
 
@@ -363,6 +359,8 @@ st:setFgDraw(function(self)
         SectionNumber = 1
         SectionNumber = (SectionNumber > #DetailedAccBuckets) and #DetailedAccBuckets or SectionNumber
 
+        mods["DetailedAcc"].config.DrawPrecision = math.max(1, math.floor(totalHits / 5000))
+
     end
 
     DetailedAccBuckets = DetailedAccBuckets or {}
@@ -409,6 +407,8 @@ st:setFgDraw(function(self)
 						dpf.saveJson("Mods/DetailedAcc/mod.json", mods.DetailedAcc)
 					end
                 end
+
+
 
                 last = helpers.InputBool("Zoom In?", mods["DetailedAcc"].config.ZoomIn)
                 if last ~= mods["DetailedAcc"].config.ZoomIn then

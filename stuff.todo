@@ -7,3 +7,21 @@ add xy offset configs for tap buttons - mhm
 check the missed patch in MineHold.lua - i tink
 
 prefix section tabs in imgui with their id (hidden with ##) - Penta: did this
+change LvlData to count for ratemod + variants / not save during editor playtests -- uh huh i did
+
+better max miss restart -- id ont wanna 
+
+
+
+
+
+full combo / P rank v/s thing
+
+angle offset bar
+
+
+
+future:
+-- maybe bring back section accuracy and stuff (misses: 4 (3))
+imgui editor for LvlData sections / max misses
+add saving scores per accessibility thing (hover over rank in song select to see them maybe :eyes:)
